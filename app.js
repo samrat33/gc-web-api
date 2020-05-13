@@ -1,71 +1,45 @@
+const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
-const app = express();
-const Article = require('./model/article');
+const userRoutes = require('./routes/user');
+const articleRoutes = require('./routes/article');
 
-mongoose.connect("mongodb+srv://devuser:ssamratt33@cluster0-wq2gn.mongodb.net/test?retryWrites=true&w=majority", {
+const app = express();
+
+mongoose.connect("mongodb://devuser:" + process.env.MONGO_ATLAS_PASSWORD + "@cluster0-shard-00-00-wq2gn.mongodb.net:27017,cluster0-shard-00-01-wq2gn.mongodb.net:27017,cluster0-shard-00-02-wq2gn.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority", {
   useUnifiedTopology: true,
   useNewUrlParser: true,
-  })
+})
   .then(() => {
     console.log("Connection to mongoDb successful")
   })
-  .catch(() => {
+  .catch((error) => {
+    console.log(error)
     console.log("Connection unsuccessful")
   });
 
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/images", express.static(path.join("images")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PATCH, DELETE, OPTIONS"
+    "GET, POST, PATCH, PUT, DELETE, OPTIONS"
   );
   next();
 });
 
-app.post("/api/v1/articles", (req, res, next) => {
-  const article = new Article({
-    articleId: req.body.articleId,
-    articleTitle: req.body.articleTitle,
-    articleSubtitle: req.body.articleSubtitle,
-    articleContent: req.body.articleContent,
-    articleCategory: req.body.articleCategory,
-    articleAuthor: req.body.articleAuthor,
-    articleCreateTimestamp: req.body.articleCreateTimestamp,
-    articleNoOfViews: req.body.articleNoOfViews,
-    articleExpiryTimestamp: req.body.articleExpiryTimestamp,
-    articleTags: req.body.articleTags,
-    articleImages: req.body.articleImages,
-    isArticleVisible: req.body.isArticleVisible,
-    articleComments: req.body.articleComments
-  })
-  article.save();
-  console.log(article);
-  res.status(201).json({
-    message: 'Post added successfully'
-  });
-});
-
-app.get("/api/v1/articles", (req, res, next) => {
-  Article.find()
-  .then(documents => {
-    console.log(documents);
-    res.status(200).json({
-      message: "Posts fetched successfully!",
-      articles: documents
-    });
-  });
-  
-});
+app.use("/api", articleRoutes);
+app.use("/api/users", userRoutes);
 
 module.exports = app;
+

@@ -7,19 +7,24 @@ var articleCommentSchema = mongoose.Schema({
 })
 
 const articleSchema = mongoose.Schema({
-    articleId: {type: String, required: true},
-    articleTitle: {type: String, required: true},
-    articleSubtitle: {type: String, required: true},
-    articleContent: {type: String, required: true},
-    articleCategory: {type: String, required: true},
-    articleAuthor: {type: String, required: true},
-    articleCreateTimestamp: {type: String, required: true},
-    articleNoOfViews: {type: Number, default: 0},
-    articleExpiryTimestamp: {type: String, required: true},
-    articleTags: [{type: String, required: true}],
-    articleImages: {type: String},
-    isArticleVisible: {type: Boolean, required: true},
-    articleComments: [{type: articleCommentSchema, required: false}]
-});
+    articleId: { type: String },
+    articleType: { type: String, required: true },
+    articleCategory: { type: String, required: true },
+    articleSubCategory: { type: String, required: true },
+    articleTitle: { type: String, required: true },
+    articleSubTitle: { type: String, required: true },
+    articleContent: { type: String, required: true },
+    articleMainImage: { type: String, required: true },
+    articleTags: [{ type: String, required: false }],
+    articleAuthor: { type: String, required: true },
+    articleNoOfViews: { type: Number, default: 0 },    
+    isArticleVisible: { type: Boolean, required: false, default: false},
+    articleCity: { type: String, required: true },
+    isArticleApproved: { type: Boolean, required: false, default: false },
+    isArticleLeadNews: { type: Boolean, required: false, default: false },
+    sendNotification: { type: Boolean, required: false, default: true },
+    creator: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    articleComments: [{ type: articleCommentSchema, required: false }]
+}, { timestamps: true });
 
 module.exports = mongoose.model('Article', articleSchema);
